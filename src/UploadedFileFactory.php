@@ -12,7 +12,7 @@ use Psr\Http\{
 /** ***********************************************************************************************
  * PSR-7 UploadedFileFactoryInterface implementation.
  *
- * @package HNV\Psr\Http
+ * @package HNV\Psr\Http\UploadedFile
  * @author  Hvorostenko
  *************************************************************************************************/
 class UploadedFileFactory implements UploadedFileFactoryInterface

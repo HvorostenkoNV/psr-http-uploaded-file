@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace HNV\Http\UploadedFile\Collection;
 
+use HNV\Http\Helper\Collection\CollectionInterface;
+
 use const UPLOAD_ERR_OK;
 use const UPLOAD_ERR_INI_SIZE;
 use const UPLOAD_ERR_FORM_SIZE;
