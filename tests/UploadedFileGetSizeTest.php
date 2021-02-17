@@ -5,11 +5,9 @@ namespace HNV\Http\UploadedFileTests;
 
 use Throwable;
 use PHPUnit\Framework\TestCase;
-use HNV\Http\Helper\Generator\Resource                  as ResourceGenerator;
-use HNV\Http\UploadedFileTests\Generator\UploadedFile   as UploadedFileGenerator;
-use HNV\Http\UploadedFileTests\Collection\ResourceAccessMode\{
-    ReadableAndWritable as ResourceAccessModeReadableAndWritable
-};
+use HNV\Http\Helper\Generator\Resource                              as ResourceGenerator;
+use HNV\Http\UploadedFileTests\Generator\UploadedFile               as UploadedFileGenerator;
+use HNV\Http\UploadedFileTests\Collection\ResourceAccessMode\Valid  as ResourceAccessModeValid;
 use HNV\Http\{
     Stream\Stream,
     UploadedFile\UploadedFile
@@ -63,7 +61,7 @@ class UploadedFileGetSizeTest extends TestCase
     {
         $result = [];
 
-        foreach (ResourceAccessModeReadableAndWritable::get() as $mode) {
+        foreach (ResourceAccessModeValid::get() as $mode) {
             $uploadedFile           = (new UploadedFileGenerator())->generate();
             $uploadedFileResource   = (new ResourceGenerator(
                 $uploadedFile['tmp_name'],
@@ -72,7 +70,7 @@ class UploadedFileGetSizeTest extends TestCase
             $fileSize               = $uploadedFile['size'];
             $result[]               = [$uploadedFileResource, $fileSize, $fileSize];
         }
-        foreach (ResourceAccessModeReadableAndWritable::get() as $mode) {
+        foreach (ResourceAccessModeValid::get() as $mode) {
             $uploadedFile           = (new UploadedFileGenerator())->generate();
             $uploadedFileResource   = (new ResourceGenerator(
                 $uploadedFile['tmp_name'],
@@ -81,7 +79,7 @@ class UploadedFileGetSizeTest extends TestCase
             $fileSize               = rand(1, 999999);
             $result[]               = [$uploadedFileResource, $fileSize, $fileSize];
         }
-        foreach (ResourceAccessModeReadableAndWritable::get() as $mode) {
+        foreach (ResourceAccessModeValid::get() as $mode) {
             $uploadedFile           = (new UploadedFileGenerator())->generate();
             $uploadedFileResource   = (new ResourceGenerator(
                 $uploadedFile['tmp_name'],
@@ -89,7 +87,7 @@ class UploadedFileGetSizeTest extends TestCase
             )->generate();
             $result[]               = [$uploadedFileResource, null, null];
         }
-        foreach (ResourceAccessModeReadableAndWritable::get() as $mode) {
+        foreach (ResourceAccessModeValid::get() as $mode) {
             $uploadedFile           = (new UploadedFileGenerator())->generate();
             $uploadedFileResource   = (new ResourceGenerator(
                 $uploadedFile['tmp_name'],

@@ -6,11 +6,9 @@ namespace HNV\Http\UploadedFileTests;
 use Throwable;
 use RuntimeException;
 use PHPUnit\Framework\TestCase;
-use HNV\Http\Helper\Generator\Resource                  as ResourceGenerator;
-use HNV\Http\UploadedFileTests\Generator\UploadedFile   as UploadedFileGenerator;
-use HNV\Http\UploadedFileTests\Collection\ResourceAccessMode\{
-    ReadableAndWritable as ResourceAccessModeReadableAndWritable
-};
+use HNV\Http\Helper\Generator\Resource                              as ResourceGenerator;
+use HNV\Http\UploadedFileTests\Generator\UploadedFile               as UploadedFileGenerator;
+use HNV\Http\UploadedFileTests\Collection\ResourceAccessMode\Valid  as ResourceAccessModeValid;
 use HNV\Http\{
     Stream\Stream,
     UploadedFile\UploadedFile
@@ -102,7 +100,7 @@ class UploadedFileGetStreamTest extends TestCase
     {
         $result = [];
 
-        foreach (ResourceAccessModeReadableAndWritable::get() as $mode) {
+        foreach (ResourceAccessModeValid::get() as $mode) {
             $uploadedFile           = (new UploadedFileGenerator())->generate();
             $uploadedFileResource   = (new ResourceGenerator(
                 $uploadedFile['tmp_name'],

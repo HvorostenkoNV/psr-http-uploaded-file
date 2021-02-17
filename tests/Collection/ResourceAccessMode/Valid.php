@@ -5,18 +5,18 @@ namespace HNV\Http\UploadedFileTests\Collection\ResourceAccessMode;
 
 use HNV\Http\Helper\Collection\CollectionInterface;
 use HNV\Http\Stream\Collection\ResourceAccessMode\{
-    All         as ResourceAccessModeAll,
-    NonSuitable as ResourceAccessModeNonSuitable
+    ReadableAndWritable as ResourceAccessModeReadableAndWritable,
+    NonSuitable         as ResourceAccessModeNonSuitable
 };
 
 use function array_diff;
 /** ***********************************************************************************************
- * Resource access mode all values (for tests only) collection.
+ * Resource access mode readable and writable values (valid) collection.
  *
  * @package HNV\Psr\Http\Tests\UploadedFile
  * @author  Hvorostenko
  *************************************************************************************************/
-class All implements CollectionInterface
+class Valid implements CollectionInterface
 {
     /** **********************************************************************
      * @inheritDoc
@@ -24,7 +24,7 @@ class All implements CollectionInterface
     public static function get(): array
     {
         return array_diff(
-            ResourceAccessModeAll::get(),
+            ResourceAccessModeReadableAndWritable::get(),
             ResourceAccessModeNonSuitable::get()
         );
     }

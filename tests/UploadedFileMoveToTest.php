@@ -12,10 +12,8 @@ use HNV\Http\Helper\Generator\{
     Directory   as DirectoryGenerator,
     Resource    as ResourceGenerator
 };
-use HNV\Http\UploadedFileTests\Generator\UploadedFile as UploadedFileGenerator;
-use HNV\Http\UploadedFileTests\Collection\ResourceAccessMode\{
-    ReadableAndWritable as ResourceAccessModeReadableAndWritable
-};
+use HNV\Http\UploadedFileTests\Generator\UploadedFile               as UploadedFileGenerator;
+use HNV\Http\UploadedFileTests\Collection\ResourceAccessMode\Valid  as ResourceAccessModeValid;
 use HNV\Http\Stream\Stream;
 use HNV\Http\UploadedFile\{
     UploadedFile,
@@ -214,7 +212,7 @@ class UploadedFileMoveToTest extends TestCase
     {
         $result = [];
 
-        foreach (ResourceAccessModeReadableAndWritable::get() as $mode) {
+        foreach (ResourceAccessModeValid::get() as $mode) {
             $uploadedFile           = (new UploadedFileGenerator())->generate();
             $uploadedFileResource   = (new ResourceGenerator(
                 $uploadedFile['tmp_name'],
@@ -223,7 +221,7 @@ class UploadedFileMoveToTest extends TestCase
             $temporaryFile          = (new FileGenerator())->generate();
             $result[]               = [$uploadedFileResource, $temporaryFile];
         }
-        foreach (ResourceAccessModeReadableAndWritable::get() as $mode) {
+        foreach (ResourceAccessModeValid::get() as $mode) {
             $uploadedFile           = (new UploadedFileGenerator())->generate();
             $uploadedFileResource   = (new ResourceGenerator(
                 $uploadedFile['tmp_name'],
@@ -245,7 +243,7 @@ class UploadedFileMoveToTest extends TestCase
     {
         $result = [];
 
-        foreach (ResourceAccessModeReadableAndWritable::get() as $mode) {
+        foreach (ResourceAccessModeValid::get() as $mode) {
             $uploadedFile           = (new UploadedFileGenerator())->generate();
             $uploadedFileResource   = (new ResourceGenerator(
                 $uploadedFile['tmp_name'],

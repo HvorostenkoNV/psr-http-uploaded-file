@@ -11,12 +11,12 @@ use HNV\Http\Stream\Collection\ResourceAccessMode\{
 
 use function array_diff;
 /** ***********************************************************************************************
- * Resource access mode writable only values (for tests only) collection.
+ * Resource access mode writable only values (invalid) collection.
  *
  * @package HNV\Psr\Http\Tests\UploadedFile
  * @author  Hvorostenko
  *************************************************************************************************/
-class WritableOnly implements CollectionInterface
+class Invalid implements CollectionInterface
 {
     /** **********************************************************************
      * @inheritDoc

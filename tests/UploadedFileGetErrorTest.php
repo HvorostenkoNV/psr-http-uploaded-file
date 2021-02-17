@@ -5,11 +5,9 @@ namespace HNV\Http\UploadedFileTests;
 
 use Throwable;
 use PHPUnit\Framework\TestCase;
-use HNV\Http\Helper\Generator\Resource                  as ResourceGenerator;
-use HNV\Http\UploadedFileTests\Generator\UploadedFile   as UploadedFileGenerator;
-use HNV\Http\UploadedFileTests\Collection\ResourceAccessMode\{
-    ReadableAndWritable as ResourceAccessModeReadableAndWritable
-};
+use HNV\Http\Helper\Generator\Resource                              as ResourceGenerator;
+use HNV\Http\UploadedFileTests\Generator\UploadedFile               as UploadedFileGenerator;
+use HNV\Http\UploadedFileTests\Collection\ResourceAccessMode\Valid  as ResourceAccessModeValid;
 use HNV\Http\Stream\Stream;
 use HNV\Http\UploadedFile\{
     UploadedFile,
@@ -75,7 +73,7 @@ class UploadedFileGetErrorTest extends TestCase
         }
 
         foreach ($errorsValuesValid as $error) {
-            foreach (ResourceAccessModeReadableAndWritable::get() as $mode) {
+            foreach (ResourceAccessModeValid::get() as $mode) {
                 $uploadedFile           = (new UploadedFileGenerator())->generate();
                 $uploadedFileResource   = (new ResourceGenerator(
                     $uploadedFile['tmp_name'],
@@ -85,7 +83,7 @@ class UploadedFileGetErrorTest extends TestCase
             }
         }
         foreach ($errorsValuesInvalid as $error) {
-            foreach (ResourceAccessModeReadableAndWritable::get() as $mode) {
+            foreach (ResourceAccessModeValid::get() as $mode) {
                 $uploadedFile           = (new UploadedFileGenerator())->generate();
                 $uploadedFileResource   = (new ResourceGenerator(
                     $uploadedFile['tmp_name'],
@@ -95,7 +93,7 @@ class UploadedFileGetErrorTest extends TestCase
             }
         }
 
-        foreach (ResourceAccessModeReadableAndWritable::get() as $mode) {
+        foreach (ResourceAccessModeValid::get() as $mode) {
             $uploadedFile           = (new UploadedFileGenerator())->generate();
             $uploadedFileResource   = (new ResourceGenerator(
                 $uploadedFile['tmp_name'],
@@ -104,7 +102,7 @@ class UploadedFileGetErrorTest extends TestCase
             $fileError              = $uploadedFile['error'];
             $result[]               = [$uploadedFileResource, $fileError, $fileError];
         }
-        foreach (ResourceAccessModeReadableAndWritable::get() as $mode) {
+        foreach (ResourceAccessModeValid::get() as $mode) {
             $uploadedFile           = (new UploadedFileGenerator())->generate();
             $uploadedFileResource   = (new ResourceGenerator(
                 $uploadedFile['tmp_name'],

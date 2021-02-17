@@ -12,8 +12,8 @@ use HNV\Http\Helper\Generator\{
 };
 use HNV\Http\UploadedFileTests\Generator\UploadedFile as UploadedFileGenerator;
 use HNV\Http\UploadedFileTests\Collection\ResourceAccessMode\{
-    WritableOnly        as ResourceAccessModeWritableOnly,
-    ReadableAndWritable as ResourceAccessModeReadableAndWritable
+    Valid   as ResourceAccessModeValid,
+    Invalid as ResourceAccessModeInvalid
 };
 use HNV\Http\{
     Stream\Stream,
@@ -63,7 +63,7 @@ class UploadedFileConstructorTest extends TestCase
     {
         $result = [];
 
-        foreach (ResourceAccessModeWritableOnly::get() as $mode) {
+        foreach (ResourceAccessModeInvalid::get() as $mode) {
             $uploadedFile           = (new UploadedFileGenerator())->generate();
             $uploadedFileResource   = (new ResourceGenerator(
                 $uploadedFile['tmp_name'],
@@ -71,7 +71,7 @@ class UploadedFileConstructorTest extends TestCase
             )->generate();
             $result[]               = [$uploadedFileResource];
         }
-        foreach (ResourceAccessModeReadableAndWritable::get() as $mode) {
+        foreach (ResourceAccessModeValid::get() as $mode) {
             $file                   = (new FileGenerator())->generate();
             $commonFileResource     = (new ResourceGenerator($file, $mode))->generate();
             $result[]               = [$commonFileResource];
