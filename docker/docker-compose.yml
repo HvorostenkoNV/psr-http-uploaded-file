@@ -1,0 +1,22 @@
+version: '3'
+
+networks:
+  psr-http-uploaded-file:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.5.0/24
+          gateway: 10.10.5.1
+
+services:
+  php:
+    build: php
+    container_name: 'psr-http-uploaded-file-php'
+    volumes:
+      - ../:/var/www/html
+    ports:
+      - "9000:9000"
+    working_dir: /var/www/html
+    networks:
+      psr-http-uploaded-file:
+        ipv4_address: 10.10.5.2
