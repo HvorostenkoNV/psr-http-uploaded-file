@@ -1,42 +1,35 @@
 <?php
+
 declare(strict_types=1);
 
 namespace HNV\Http\UploadedFileTests;
 
-use Throwable;
-use RuntimeException;
-use PHPUnit\Framework\TestCase;
-use HNV\Http\Helper\Generator\Resource                              as ResourceGenerator;
-use HNV\Http\UploadedFileTests\Generator\UploadedFile               as UploadedFileGenerator;
-use HNV\Http\UploadedFileTests\Collection\ResourceAccessMode\Valid  as ResourceAccessModeValid;
 use HNV\Http\{
     Stream\Stream,
-    UploadedFile\UploadedFile
+    UploadedFile\UploadedFile,
 };
+use RuntimeException;
 
 use function md5_file;
 use function unlink;
-/** ***********************************************************************************************
+
+/**
  * PSR-7 UploadedFileInterface implementation test.
  *
  * Testing stream providing process.
  *
- * @package HNV\Psr\Http\Tests\UploadedFile
- * @author  Hvorostenko
- *************************************************************************************************/
-class UploadedFileGetStreamTest extends TestCase
+ * @internal
+ * @covers UploadedFile
+ * @small
+ */
+class UploadedFileGetStreamTest extends AbstractUploadedFileTest
 {
-    /** **********************************************************************
-     * Test "UploadedFile::getStream" provides expected stream object.
-     *
+    /**
      * @covers          UploadedFile::getStream
-     * @dataProvider    dataProviderResources
+     * @dataProvider    dataProviderResourcesValid
      *
-     * @param           resource $resource              Resource.
-     *
-     * @return          void
-     * @throws          Throwable
-     ************************************************************************/
+     * @param resource $resource
+     */
     public function testGetValue($resource): void
     {
         $stream             = new Stream($resource);
@@ -47,32 +40,28 @@ class UploadedFileGetStreamTest extends TestCase
         $uploadedFilePath   = $uploadedFile->getStream()->getMetadata('uri');
         $uploadedFileHash   = md5_file($uploadedFilePath);
 
-        self::assertEquals(
+        static::assertSame(
             $streamFilePath,
             $uploadedFilePath,
-            "Action \"UploadedFile->getStream\" returned unexpected result.\n".
-            "Expected result is \"stream file path => $streamFilePath\".\n".
-            "Caught result is \"stream file path => $uploadedFilePath\"."
+            "Action [UploadedFile->getStream] returned unexpected result.\n".
+            "Expected result is [stream file path => {$streamFilePath}].\n".
+            "Caught result is [stream file path => {$uploadedFilePath}]."
         );
-        self::assertEquals(
+        static::assertSame(
             $streamFileHash,
             $uploadedFileHash,
-            "Action \"UploadedFile->getStream\" returned unexpected result.\n".
-            "Expected result is \"stream file hash as was set\".\n".
-            "Caught result is \"stream file hash is not the same\"."
+            "Action [UploadedFile->getStream] returned unexpected result.\n".
+            "Expected result is [stream file hash as was set].\n".
+            'Caught result is "stream file hash is not the same".'
         );
     }
-    /** **********************************************************************
-     * Test "UploadedFile::getStream" throws exception with no stream available.
-     *
+
+    /**
      * @covers          UploadedFile::getStream
-     * @dataProvider    dataProviderResources
+     * @dataProvider    dataProviderResourcesValid
      *
-     * @param           resource $resource              Resource.
-     *
-     * @return          void
-     * @throws          Throwable
-     ************************************************************************/
+     * @param resource $resource resource
+     */
     public function testGetValueThrowsException($resource): void
     {
         $this->expectException(RuntimeException::class);
@@ -84,31 +73,11 @@ class UploadedFileGetStreamTest extends TestCase
         unlink($filePath);
         $uploadedFile->getStream();
 
-        self::fail(
-            "Action \"UploadedFile->getStream\" threw no expected exception.\n".
+        static::fail(
+            "Action [UploadedFile->getStream] threw no expected exception.\n".
             "Underlying file was deleted.\n".
-            "Expects \"RuntimeException\" exception.\n".
+            "Expects [RuntimeException] exception.\n".
             'Caught no exception.'
         );
-    }
-    /** **********************************************************************
-     * Data provider: uploaded files resources.
-     *
-     * @return  array                                   Data.
-     ************************************************************************/
-    public function dataProviderResources(): array
-    {
-        $result = [];
-
-        foreach (ResourceAccessModeValid::get() as $mode) {
-            $uploadedFile           = (new UploadedFileGenerator())->generate();
-            $uploadedFileResource   = (new ResourceGenerator(
-                $uploadedFile['tmp_name'],
-                $mode)
-            )->generate();
-            $result[]               = [$uploadedFileResource];
-        }
-
-        return $result;
     }
 }

@@ -1,99 +1,112 @@
 <?php
+
 declare(strict_types=1);
 
 namespace HNV\Http\UploadedFileTests;
 
-use Throwable;
-use PHPUnit\Framework\TestCase;
-use HNV\Http\Helper\Generator\Resource                              as ResourceGenerator;
-use HNV\Http\UploadedFileTests\Generator\UploadedFile               as UploadedFileGenerator;
-use HNV\Http\UploadedFileTests\Collection\ResourceAccessMode\Valid  as ResourceAccessModeValid;
 use HNV\Http\{
     Stream\Stream,
-    UploadedFile\UploadedFile
+    UploadedFile\UploadedFile,
 };
 
 use function rand;
-/** ***********************************************************************************************
+
+/**
  * PSR-7 UploadedFileInterface implementation test.
  *
  * Testing size info providing process.
  *
- * @package HNV\Psr\Http\Tests\UploadedFile
- * @author  Hvorostenko
- *************************************************************************************************/
-class UploadedFileGetSizeTest extends TestCase
+ * @internal
+ * @covers UploadedFile
+ * @small
+ */
+class UploadedFileGetSizeTest extends AbstractUploadedFileTest
 {
-    /** **********************************************************************
-     * Test "UploadedFile::getSize" provides expected value.
-     *
+    /**
      * @covers          UploadedFile::getSize
      * @dataProvider    dataProviderUploadedFileWithSizeParams
      *
-     * @param           resource    $resource           Resource.
-     * @param           int|null    $size               Size.
-     * @param           int|null    $sizeExpected       Size expected.
-     *
-     * @return          void
-     * @throws          Throwable
-     ************************************************************************/
+     * @param resource $resource
+     */
     public function testGetValue($resource, int|null $size, int|null $sizeExpected): void
     {
         $stream         = new Stream($resource);
         $uploadedFile   = new UploadedFile($stream, $size);
         $sizeCaught     = $uploadedFile->getSize();
 
-        self::assertEquals(
+        static::assertSame(
             $sizeExpected,
             $sizeCaught,
-            "Action \"UploadedFile->getSize\" returned unexpected result.\n".
-            "Constructor was called with parameters (size => $size).\n".
-            "Expected result is \"$sizeExpected\".\n".
-            "Caught result is \"$sizeCaught\"."
+            "Action [UploadedFile->getSize] returned unexpected result.\n".
+            "Constructor was called with parameters [size => {$size}].\n".
+            "Expected result is [{$sizeExpected}].\n".
+            "Caught result is [{$sizeCaught}]."
         );
     }
-    /** **********************************************************************
-     * Data provider: uploaded files with size values.
+
+    /**
+     * @covers          UploadedFile::getSize
+     * @dataProvider    dataProviderResourcesValid
      *
-     * @return  array                                   Data.
-     ************************************************************************/
+     * @param resource $resource
+     */
+    public function testGetEmptyValue($resource): void
+    {
+        $stream         = new Stream($resource);
+        $uploadedFile   = new UploadedFile($stream);
+
+        static::assertNull(
+            $uploadedFile->getSize(),
+            "Action [UploadedFile->getSize] returned unexpected result.\n".
+            "Action was called without parameters [size].\n".
+            "Expected result is null.\n".
+            'Caught result is not null.'
+        );
+    }
+
+    /**
+     * Data provider: uploaded files with size values.
+     */
     public function dataProviderUploadedFileWithSizeParams(): array
     {
         $result = [];
 
-        foreach (ResourceAccessModeValid::get() as $mode) {
-            $uploadedFile           = (new UploadedFileGenerator())->generate();
-            $uploadedFileResource   = (new ResourceGenerator(
-                $uploadedFile['tmp_name'],
-                $mode)
-            )->generate();
-            $fileSize               = $uploadedFile['size'];
-            $result[]               = [$uploadedFileResource, $fileSize, $fileSize];
+        foreach ($this->getResourceAccessModesValid() as $mode) {
+            $uploadedFile           = $this->generateUploadedFile();
+            $uploadedFileResource   = $this->generateResource($uploadedFile->getTmpName(), $mode);
+            $result[]               = [
+                $uploadedFileResource,
+                $uploadedFile->getSize(),
+                $uploadedFile->getSize(),
+            ];
         }
-        foreach (ResourceAccessModeValid::get() as $mode) {
-            $uploadedFile           = (new UploadedFileGenerator())->generate();
-            $uploadedFileResource   = (new ResourceGenerator(
-                $uploadedFile['tmp_name'],
-                $mode)
-            )->generate();
+        foreach ($this->getResourceAccessModesValid() as $mode) {
+            $uploadedFile           = $this->generateUploadedFile();
+            $uploadedFileResource   = $this->generateResource($uploadedFile->getTmpName(), $mode);
             $fileSize               = rand(1, 999999);
-            $result[]               = [$uploadedFileResource, $fileSize, $fileSize];
+            $result[]               = [
+                $uploadedFileResource,
+                $fileSize,
+                $fileSize,
+            ];
         }
-        foreach (ResourceAccessModeValid::get() as $mode) {
-            $uploadedFile           = (new UploadedFileGenerator())->generate();
-            $uploadedFileResource   = (new ResourceGenerator(
-                $uploadedFile['tmp_name'],
-                $mode)
-            )->generate();
-            $result[]               = [$uploadedFileResource, null, null];
+        foreach ($this->getResourceAccessModesValid() as $mode) {
+            $uploadedFile           = $this->generateUploadedFile();
+            $uploadedFileResource   = $this->generateResource($uploadedFile->getTmpName(), $mode);
+            $result[]               = [
+                $uploadedFileResource,
+                null,
+                null,
+            ];
         }
-        foreach (ResourceAccessModeValid::get() as $mode) {
-            $uploadedFile           = (new UploadedFileGenerator())->generate();
-            $uploadedFileResource   = (new ResourceGenerator(
-                $uploadedFile['tmp_name'],
-                $mode)
-            )->generate();
-            $result[]               = [$uploadedFileResource, 0, null];
+        foreach ($this->getResourceAccessModesValid() as $mode) {
+            $uploadedFile           = $this->generateUploadedFile();
+            $uploadedFileResource   = $this->generateResource($uploadedFile->getTmpName(), $mode);
+            $result[]               = [
+                $uploadedFileResource,
+                0,
+                null,
+            ];
         }
 
         return $result;

@@ -1,36 +1,33 @@
 <?php
+
 declare(strict_types=1);
 
 namespace HNV\Http\UploadedFileTests;
 
-use Throwable;
-use InvalidArgumentException;
-use PHPUnit\Framework\TestCase;
 use HNV\Http\{
     Stream\Stream,
-    UploadedFile\UploadedFileFactory
+    UploadedFile\UploadedFileError,
+    UploadedFile\UploadedFileFactory,
 };
+use InvalidArgumentException;
 
 use function md5_file;
-/** ***********************************************************************************************
+
+/**
  * PSR-7 UploadedFileFactoryInterface implementation test.
  *
- * @package HNV\Psr\Http\Tests\UploadedFile
- * @author  Hvorostenko
- *************************************************************************************************/
-class UploadedFileFactoryTest extends TestCase
+ * @internal
+ * @covers UploadedFileFactory
+ * @small
+ */
+class UploadedFileFactoryTest extends AbstractUploadedFileTest
 {
-    /** **********************************************************************
-     * Test "UploadedFileFactoryInterface::createUploadedFile" throws exception with invalid stream.
-     *
+    /**
      * @covers          UploadedFileFactory::createUploadedFile
-     * @dataProvider    dataProviderUploadedFilesResourcesInvalid
+     * @dataProvider    dataProviderResourcesInvalid
      *
-     * @param           resource $resource          Resource.
-     *
-     * @return          void
-     * @throws          Throwable
-     ************************************************************************/
+     * @param resource $resource
+     */
     public function testConstructorThrowsException($resource): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -38,25 +35,20 @@ class UploadedFileFactoryTest extends TestCase
         $stream = new Stream($resource);
         (new UploadedFileFactory())->createUploadedFile($stream);
 
-        self::fail(
-            "Action \"UploadedFileFactory->createUploadedFile\" threw no expected exception.\n".
-            "Action was called with parameters (stream => invalid stream).\n".
-            "Expects \"InvalidArgumentException\" exception.\n".
+        static::fail(
+            "Action [UploadedFileFactory->createUploadedFile] threw no expected exception.\n".
+            "Action was called with parameters [stream => invalid stream].\n".
+            "Expects [InvalidArgumentException] exception.\n".
             'Caught no exception.'
         );
     }
-    /** **********************************************************************
-     * Test "UploadedFileFactoryInterface::createUploadedFile" provides uploaded file
-     * with stream in expected state.
-     *
+
+    /**
      * @covers          UploadedFileFactory::createUploadedFile
-     * @dataProvider    dataProviderUploadedFilesResourcesValid
+     * @dataProvider    dataProviderResourcesValid
      *
-     * @param           resource $resource              Resource.
-     *
-     * @return          void
-     * @throws          Throwable
-     ************************************************************************/
+     * @param resource $resource
+     */
     public function testUploadedFileStream($resource): void
     {
         $stream             = new Stream($resource);
@@ -67,99 +59,87 @@ class UploadedFileFactoryTest extends TestCase
         $uploadedFilePath   = $uploadedFile->getStream()->getMetadata('uri');
         $uploadedFileHash   = md5_file($uploadedFilePath);
 
-        self::assertEquals(
+        static::assertSame(
             $streamFilePath,
             $uploadedFilePath,
-            "Action \"UploadedFile->getStream\" returned unexpected result.\n".
-            "Expected result is \"stream file path => $streamFilePath\".\n".
-            "Caught result is \"stream file path => $uploadedFilePath\"."
+            "Action [UploadedFile->getStream] returned unexpected result.\n".
+            "Expected result is [stream file path => {$streamFilePath}].\n".
+            "Caught result is [stream file path => {$uploadedFilePath}]."
         );
-        self::assertEquals(
+        static::assertSame(
             $streamFileHash,
             $uploadedFileHash,
-            "Action \"UploadedFile->getStream\" returned unexpected result.\n".
-            "Expected result is \"stream file hash as was set\".\n".
-            "Caught result is \"stream file hash is not the same\"."
+            "Action [UploadedFile->getStream] returned unexpected result.\n".
+            "Expected result is [stream file hash as was set].\n".
+            'Caught result is "stream file hash is not the same".'
         );
     }
-    /** **********************************************************************
-     * Test "UploadedFileFactoryInterface::createUploadedFile" provides uploaded file
-     * with expected size.
-     *
+
+    /**
      * @covers          UploadedFileFactory::createUploadedFile
-     * @dataProvider    dataProviderUploadedFileWithSizeParams
+     * @dataProvider    \HNV\Http\UploadedFileTests\UploadedFileGetSizeTest::dataProviderUploadedFileWithSizeParams
      *
-     * @param           resource    $resource           Resource.
-     * @param           int|null    $size               Size.
-     * @param           int|null    $sizeExpected       Size expected.
-     *
-     * @return          void
-     * @throws          Throwable
-     ************************************************************************/
-    public function testUploadedFileSize($resource, int|null $size, int|null $sizeExpected): void
-    {
+     * @param resource $resource
+     */
+    public function testUploadedFileSize(
+        $resource,
+        int|null $size,
+        int|null $sizeExpected
+    ): void {
         $stream         = new Stream($resource);
         $uploadedFile   = (new UploadedFileFactory())->createUploadedFile($stream, $size);
         $sizeCaught     = $uploadedFile->getSize();
 
-        self::assertEquals(
+        static::assertSame(
             $sizeExpected,
             $sizeCaught,
-            "Action \"UploadedFileFactory->createUploadedFile->getSize\" returned unexpected result.\n".
-            "Action was called with parameters (size => $size).\n".
-            "Expected result is \"$sizeExpected\".\n".
-            "Caught result is \"$sizeCaught\"."
+            "Action [UploadedFileFactory->createUploadedFile->getSize] returned unexpected result.\n".
+            "Action was called with parameters [size => {$size}].\n".
+            "Expected result is [{$sizeExpected}].\n".
+            "Caught result is [{$sizeCaught}]."
         );
     }
-    /** **********************************************************************
-     * Test "UploadedFileFactoryInterface::createUploadedFile" provides uploaded file
-     * with expected error.
-     *
+
+    /**
      * @covers          UploadedFileFactory::createUploadedFile
-     * @dataProvider    dataProviderUploadedFileWithErrorParams
+     * @dataProvider    \HNV\Http\UploadedFileTests\UploadedFileGetErrorTest::dataProviderUploadedFileWithErrorParams
      *
-     * @param           resource    $resource           Resource.
-     * @param           int|null    $error              Error.
-     * @param           int         $errorExpected      Error expected.
-     *
-     * @return          void
-     * @throws          Throwable
-     ************************************************************************/
-    public function testUploadedFileError($resource, int|null $error, int $errorExpected): void
-    {
+     * @param resource $resource
+     */
+    public function testUploadedFileError(
+        $resource,
+        UploadedFileError $error,
+        int $errorExpected
+    ): void {
         $stream         = new Stream($resource);
-        $uploadedFile   = (new UploadedFileFactory())->createUploadedFile($stream, null, $error);
+        $uploadedFile   = (new UploadedFileFactory())->createUploadedFile(
+            $stream,
+            null,
+            $error->value()
+        );
         $errorCaught    = $uploadedFile->getError();
 
-        self::assertEquals(
+        static::assertSame(
             $errorExpected,
             $errorCaught,
-            "Action \"UploadedFileFactory->createUploadedFile->getError\" returned unexpected result.\n".
-            "Action was called with parameters (error => $error).\n".
-            "Expected result is \"$errorExpected\".\n".
-            "Caught result is \"$errorCaught\"."
+            "Action [UploadedFileFactory->createUploadedFile->getError] returned unexpected result.\n".
+            "Action was called with parameters [error => {$error->value()}].\n".
+            "Expected result is [{$errorExpected}].\n".
+            "Caught result is [{$errorCaught}]."
         );
     }
-    /** **********************************************************************
-     * Test "UploadedFileFactoryInterface::createUploadedFile" provides uploaded file
-     * with expected client file name.
-     *
+
+    /**
      * @covers          UploadedFileFactory::createUploadedFile
-     * @dataProvider    dataProviderUploadedFilesWithNameParams
+     * @dataProvider    \HNV\Http\UploadedFileTests\UploadedFileGetClientNameTest::dataProviderUploadedFilesWithNameParams
      *
-     * @param           resource    $resource           Resource.
-     * @param           string|null $fileName           File name.
-     * @param           string|null $fileNameExpected   File name expected.
-     *
-     * @return          void
-     * @throws          Throwable
-     ************************************************************************/
+     * @param resource $resource
+     */
     public function testUploadedFileClientFilename(
-                    $resource,
+        $resource,
         string|null $fileName,
         string|null $fileNameExpected
-    ): void
-    {
+    ): void {
         $stream         = new Stream($resource);
         $uploadedFile   = (new UploadedFileFactory())->createUploadedFile(
             $stream,
@@ -169,36 +149,28 @@ class UploadedFileFactoryTest extends TestCase
         );
         $fileNameCaught = $uploadedFile->getClientFilename();
 
-        self::assertEquals(
+        static::assertSame(
             $fileNameExpected,
             $fileNameCaught,
-            "Action \"UploadedFileFactory->createUploadedFile->getClientFilename\"".
+            'Action "UploadedFileFactory->createUploadedFile->getClientFilename"'.
             " returned unexpected result.\n".
-            "Action was called with parameters (client file name => $fileName).\n".
-            "Expected result is \"$fileNameExpected\".\n".
-            "Caught result is \"$fileNameCaught\"."
+            "Action was called with parameters [client file name => {$fileName}].\n".
+            "Expected result is [{$fileNameExpected}].\n".
+            "Caught result is [{$fileNameCaught}]."
         );
     }
-    /** **********************************************************************
-     * Test "UploadedFileFactoryInterface::createUploadedFile" provides uploaded file
-     * with expected client media type.
-     *
+
+    /**
      * @covers          UploadedFileFactory::createUploadedFile
-     * @dataProvider    dataProviderUploadedFilesWithMediaTypeParams
+     * @dataProvider    \HNV\Http\UploadedFileTests\UploadedFileGetClientMediaTypeTest::dataProviderUploadedFilesWithMediaTypeParams
      *
-     * @param           resource    $resource           Resource.
-     * @param           string|null $mediaType          Media type.
-     * @param           string|null $mediaTypeExpected  Media type expected.
-     *
-     * @return          void
-     * @throws          Throwable
-     ************************************************************************/
+     * @param resource $resource
+     */
     public function testUploadedFileClientMediaType(
-                    $resource,
+        $resource,
         string|null $mediaType,
         string|null $mediaTypeExpected
-    ): void
-    {
+    ): void {
         $stream             = new Stream($resource);
         $uploadedFile       = (new UploadedFileFactory())->createUploadedFile(
             $stream,
@@ -209,68 +181,14 @@ class UploadedFileFactoryTest extends TestCase
         );
         $mediaTypeCaught    = $uploadedFile->getClientMediaType();
 
-        self::assertEquals(
+        static::assertSame(
             $mediaTypeExpected,
             $mediaTypeCaught,
-            "Action \"UploadedFileFactory->createUploadedFile->getClientFilename\"".
+            'Action "UploadedFileFactory->createUploadedFile->getClientFilename"'.
             " returned unexpected result.\n".
-            "Action was called with parameters (client file name => $mediaType).\n".
-            "Expected result is \"$mediaTypeExpected\".\n".
-            "Caught result is \"$mediaTypeCaught\"."
+            "Action was called with parameters [client file name => {$mediaType}].\n".
+            "Expected result is [{$mediaTypeExpected}].\n".
+            "Caught result is [{$mediaTypeCaught}]."
         );
-    }
-    /** **********************************************************************
-     * Data provider: valid uploaded files resources.
-     *
-     * @return  array                                   Data.
-     ************************************************************************/
-    public function dataProviderUploadedFilesResourcesValid(): array
-    {
-        return (new UploadedFileGetStreamTest())->dataProviderResources();
-    }
-    /** **********************************************************************
-     * Data provider: invalid uploaded files resources.
-     *
-     * @return  array                                   Data.
-     ************************************************************************/
-    public function dataProviderUploadedFilesResourcesInvalid(): array
-    {
-        return (new UploadedFileConstructorTest())->dataProviderResourcesInvalid();
-    }
-    /** **********************************************************************
-     * Data provider: uploaded files with size values.
-     *
-     * @return  array                                   Data.
-     ************************************************************************/
-    public function dataProviderUploadedFileWithSizeParams(): array
-    {
-        return (new UploadedFileGetSizeTest())->dataProviderUploadedFileWithSizeParams();
-    }
-    /** **********************************************************************
-     * Data provider: uploaded files with errors values.
-     *
-     * @return  array                                   Data.
-     ************************************************************************/
-    public function dataProviderUploadedFileWithErrorParams(): array
-    {
-        return (new UploadedFileGetErrorTest())->dataProviderUploadedFileWithErrorParams();
-    }
-    /** **********************************************************************
-     * Data provider: uploaded files with client file name values.
-     *
-     * @return  array                                   Data.
-     ************************************************************************/
-    public function dataProviderUploadedFilesWithNameParams(): array
-    {
-        return (new UploadedFileGetClientNameTest())->dataProviderUploadedFilesWithNameParams();
-    }
-    /** **********************************************************************
-     * Data provider: uploaded files with client media type values.
-     *
-     * @return  array                                   Data.
-     ************************************************************************/
-    public function dataProviderUploadedFilesWithMediaTypeParams(): array
-    {
-        return (new UploadedFileGetClientMediaTypeTest())->dataProviderUploadedFilesWithMediaTypeParams();
     }
 }

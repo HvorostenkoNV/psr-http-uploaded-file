@@ -1,33 +1,33 @@
 <?php
+
 declare(strict_types=1);
 
 namespace HNV\Http\UploadedFileTests\Generator;
 
-use LogicException;
 use HNV\Http\Helper\Generator\{
-    GeneratorInterface,
-    AbstractGenerator,
+    ClearableGenerator,
     File    as FileGenerator,
-    Text    as TextGenerator
+    GeneratorInterface,
+    Text    as TextGenerator,
 };
-use HNV\Http\UploadedFile\Collection\UploadedFileError as UploadedFileErrorCollection;
+use HNV\Http\UploadedFile\UploadedFileError;
+use LogicException;
 
-use function is_file;
-use function explode;
-use function strlen;
 use function array_pop;
 use function array_rand;
+use function array_search;
+use function explode;
 use function file_put_contents;
+use function is_file;
+use function strlen;
 use function unlink;
 
 use const DIRECTORY_SEPARATOR;
-/** ***********************************************************************************************
+
+/**
  * Upload file generator.
- *
- * @package HNV\Psr\Http\Tests\UploadedFile
- * @author  Hvorostenko
- *************************************************************************************************/
-class UploadedFile extends AbstractGenerator implements GeneratorInterface
+ */
+class UploadedFile extends ClearableGenerator implements GeneratorInterface
 {
     private const UPLOAD_FILES_REGISTRATION_KEY = 'UT_EMULATED_UPLOAD_FILES_KEY';
     private const FILE_TYPES                    = [
@@ -35,20 +35,11 @@ class UploadedFile extends AbstractGenerator implements GeneratorInterface
         'jpg'   => 'image/jpeg',
         'pdf'   => 'application/pdf',
     ];
-    /** **********************************************************************
-     * @inheritDoc
-     *
-     * @return array                        Uploaded file data.
-     * @example
-     *         [
-     *          name        => file name,
-     *          type        => file MIME type,
-     *          tmp_name    => file full path,
-     *          error       => uploaded file error,
-     *          size        => file size,
-     *         ]
-     ************************************************************************/
-    public function generate(): array
+
+    /**
+     * {@inheritDoc}
+     */
+    public function generate(): GeneratedUploadedFileData
     {
         $fileExtension          = array_rand(self::FILE_TYPES);
         $fileMimeType           = self::FILE_TYPES[$fileExtension];
@@ -66,31 +57,41 @@ class UploadedFile extends AbstractGenerator implements GeneratorInterface
 
         $this->registerUploadedFile($fileFullName);
 
-        $this->clear(function() use ($fileFullName) {
+        $this->clear(function () use ($fileFullName): void {
+            $this->unregisterUploadedFile($fileFullName);
+
             if (is_file($fileFullName)) {
                 unlink($fileFullName);
             }
         });
 
-        return [
-            'name'      => $fileShortName,
-            'type'      => $fileMimeType,
-            'tmp_name'  => $fileFullName,
-            'error'     => UploadedFileErrorCollection::STATUS_OK,
-            'size'      => $fileSize
-        ];
+        return new GeneratedUploadedFileData(
+            $fileShortName,
+            $fileMimeType,
+            $fileFullName,
+            UploadedFileError::OK,
+            $fileSize
+        );
     }
-    /** **********************************************************************
+
+    /**
      * Register file and mark it as UnitTests temporary uploaded file.
-     *
-     * @param   string $filePath            File path.
-     *
-     * @return  void
-     ************************************************************************/
+     */
     private function registerUploadedFile(string $filePath): void
     {
         $index              = self::UPLOAD_FILES_REGISTRATION_KEY;
-        $GLOBALS[$index]    = $GLOBALS[$index] ?? [];
+        $GLOBALS[$index] ??= [];
         $GLOBALS[$index][]  = $filePath;
+    }
+
+    /**
+     * Unregister file, remark it as UnitTests temporary uploaded file.
+     */
+    private function unregisterUploadedFile(string $filePath): void
+    {
+        $index          = self::UPLOAD_FILES_REGISTRATION_KEY;
+        $arraySearch    = array_search($filePath, $GLOBALS[$index], true);
+
+        unset($GLOBALS[$index][$arraySearch]);
     }
 }
