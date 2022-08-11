@@ -9,25 +9,21 @@ use HNV\Http\UploadedFile\{
     UploadedFile,
     UploadedFileError,
 };
+use PHPUnit\Framework\Attributes;
 
 /**
- * PSR-7 UploadedFileInterface implementation test.
- *
- * Testing error info providing process.
- *
  * @internal
- * @covers UploadedFile
- * @small
  */
-class UploadedFileGetErrorTest extends AbstractUploadedFileTest
+#[Attributes\CoversClass(UploadedFile::class)]
+#[Attributes\Small]
+class UploadedFileGetErrorTest extends AbstractUploadedFileTestCase
 {
     /**
-     * @covers          UploadedFile::getError
-     * @dataProvider    dataProviderUploadedFileWithErrorParams
-     *
      * @param resource $resource
      */
-    public function testGetValue(
+    #[Attributes\Test]
+    #[Attributes\DataProvider('dataProviderUploadedFileWithErrorParams')]
+    public function getError(
         $resource,
         UploadedFileError $error,
         int $errorExpected
@@ -36,67 +32,48 @@ class UploadedFileGetErrorTest extends AbstractUploadedFileTest
         $uploadedFile   = new UploadedFile($stream, null, $error);
         $errorCaught    = $uploadedFile->getError();
 
-        static::assertSame(
-            $errorExpected,
-            $errorCaught,
-            "Action [UploadedFile->getError] returned unexpected result.\n".
-            "Action was called with parameters [error => {$error->value()}].\n".
-            "Expected result is [{$errorExpected}].\n".
-            "Caught result is [{$errorCaught}]."
-        );
+        static::assertSame($errorExpected, $errorCaught);
     }
 
     /**
-     * @covers          UploadedFile::getError
-     * @dataProvider    dataProviderResourcesValid
-     *
      * @param resource $resource
      */
-    public function testGetEmptyValue($resource): void
+    #[Attributes\Test]
+    #[Attributes\DataProvider('dataProviderResourcesValid')]
+    public function getErrorEmpty($resource): void
     {
         $stream         = new Stream($resource);
         $uploadedFile   = new UploadedFile($stream);
         $errorDefault   = UploadedFileError::OK->value();
         $errorCaught    = $uploadedFile->getError();
 
-        static::assertSame(
-            $errorDefault,
-            $errorCaught,
-            "Action [UploadedFile->getError] returned unexpected result.\n".
-            "Action was called without parameters [error].\n".
-            "Expected result is [{$errorDefault}].\n".
-            "Caught result is [{$errorCaught}]."
-        );
+        static::assertSame($errorDefault, $errorCaught);
     }
 
-    /**
-     * Data provider: uploaded files with errors values.
-     */
-    public function dataProviderUploadedFileWithErrorParams(): array
+    public function dataProviderUploadedFileWithErrorParams(): iterable
     {
-        $result = [];
-
         foreach (UploadedFileError::cases() as $error) {
             foreach ($this->getResourceAccessModesValid() as $mode) {
                 $uploadedFile           = $this->generateUploadedFile();
-                $uploadedFileResource   = $this->generateResource($uploadedFile->getTmpName(), $mode);
-                $result[]               = [
+                $uploadedFileResource   = $this->generateResource($uploadedFile->tmpName, $mode);
+
+                yield [
                     $uploadedFileResource,
                     $error,
                     $error->value(),
                 ];
             }
         }
+
         foreach ($this->getResourceAccessModesValid() as $mode) {
             $uploadedFile           = $this->generateUploadedFile();
-            $uploadedFileResource   = $this->generateResource($uploadedFile->getTmpName(), $mode);
-            $result[]               = [
+            $uploadedFileResource   = $this->generateResource($uploadedFile->tmpName, $mode);
+
+            yield [
                 $uploadedFileResource,
-                $uploadedFile->getError(),
-                $uploadedFile->getError()->value(),
+                $uploadedFile->error,
+                $uploadedFile->error->value(),
             ];
         }
-
-        return $result;
     }
 }

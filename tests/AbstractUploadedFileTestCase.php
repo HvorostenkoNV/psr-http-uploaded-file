@@ -19,53 +19,36 @@ use HNV\Http\UploadedFileTests\Generator\{
 };
 use PHPUnit\Framework\TestCase;
 
-/**
- * Abstract uploaded file test class.
- *
- * Provides several helpfully methods.
- */
-abstract class AbstractUploadedFileTest extends TestCase
+abstract class AbstractUploadedFileTestCase extends TestCase
 {
-    /**
-     * Data provider: valid/suitable uploaded files resources.
-     */
-    public function dataProviderResourcesValid(): array
+    public function dataProviderResourcesValid(): iterable
     {
-        $result = [];
-
         foreach ($this->getResourceAccessModesValid() as $mode) {
             $uploadedFile           = $this->generateUploadedFile();
-            $uploadedFileResource   = $this->generateResource($uploadedFile->getTmpName(), $mode);
-            $result[]               = [$uploadedFileResource];
-        }
+            $uploadedFileResource   = $this->generateResource($uploadedFile->tmpName, $mode);
 
-        return $result;
+            yield [$uploadedFileResource];
+        }
     }
 
-    /**
-     * Data provider: invalid/not suitable uploaded files resources.
-     */
-    public function dataProviderResourcesInvalid(): array
+    public function dataProviderResourcesInvalid(): iterable
     {
-        $result = [];
-
         foreach ($this->getResourceAccessModesInvalid() as $mode) {
             $uploadedFile           = $this->generateUploadedFile();
-            $uploadedFileResource   = $this->generateResource($uploadedFile->getTmpName(), $mode);
-            $result[]               = [$uploadedFileResource];
-        }
-        foreach ($this->getResourceAccessModesValid() as $mode) {
-            $file                   = $this->generateFile();
-            $commonFileResource     = $this->generateResource($file, $mode);
-            $result[]               = [$commonFileResource];
+            $uploadedFileResource   = $this->generateResource($uploadedFile->tmpName, $mode);
+
+            yield [$uploadedFileResource];
         }
 
-        return $result;
+        foreach ($this->getResourceAccessModesValid() as $mode) {
+            $file               = $this->generateFile();
+            $commonFileResource = $this->generateResource($file, $mode);
+
+            yield [$commonFileResource];
+        }
     }
 
     /**
-     * Get resource access modes set, valid for tests.
-     *
      * @return AccessMode[]
      */
     protected function getResourceAccessModesValid(): array
@@ -77,8 +60,6 @@ abstract class AbstractUploadedFileTest extends TestCase
     }
 
     /**
-     * Get resource access modes set, invalid for tests.
-     *
      * @return AccessMode[]
      */
     protected function getResourceAccessModesInvalid(): array
@@ -89,33 +70,22 @@ abstract class AbstractUploadedFileTest extends TestCase
         );
     }
 
-    /**
-     * Generate file and get it`s path.
-     */
     protected function generateFile(): string
     {
         return (new FileGenerator())->generate();
     }
 
-    /**
-     * Generate directory and get it`s path.
-     */
     protected function generateDirectory(): string
     {
         return (new DirectoryGenerator())->generate();
     }
 
-    /**
-     * Generate uploaded file and get it`s data.
-     */
     protected function generateUploadedFile(): GeneratedUploadedFileData
     {
         return (new UploadedFileGenerator())->generate();
     }
 
     /**
-     * Generate resource.
-     *
      * @return resource
      */
     protected function generateResource(string $filePath, AccessMode $mode): mixed

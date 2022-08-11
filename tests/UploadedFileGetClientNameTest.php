@@ -9,25 +9,21 @@ use HNV\Http\{
     UploadedFile\UploadedFile,
     UploadedFile\UploadedFileError,
 };
+use PHPUnit\Framework\Attributes;
 
 /**
- * PSR-7 UploadedFileInterface implementation test.
- *
- * Testing file client name info providing process.
- *
  * @internal
- * @covers UploadedFile
- * @small
  */
-class UploadedFileGetClientNameTest extends AbstractUploadedFileTest
+#[Attributes\CoversClass(UploadedFile::class)]
+#[Attributes\Small]
+class UploadedFileGetClientNameTest extends AbstractUploadedFileTestCase
 {
     /**
-     * @covers          UploadedFile::getClientFilename
-     * @dataProvider    dataProviderUploadedFilesWithNameParams
-     *
      * @param resource $resource
      */
-    public function testGetValue(
+    #[Attributes\Test]
+    #[Attributes\DataProvider('dataProviderUploadedFilesWithNameParams')]
+    public function getClientFilename(
         $resource,
         string|null $fileName,
         string|null $fileNameExpected
@@ -41,71 +37,55 @@ class UploadedFileGetClientNameTest extends AbstractUploadedFileTest
         );
         $fileNameCaught = $uploadedFile->getClientFilename();
 
-        static::assertSame(
-            $fileNameExpected,
-            $fileNameCaught,
-            "Action [UploadedFile->getClientFilename] returned unexpected result.\n".
-            "Action was called with parameters [client file name => {$fileName}].\n".
-            "Expected result is [{$fileNameExpected}].\n".
-            "Caught result is [{$fileNameCaught}]."
-        );
+        static::assertSame($fileNameExpected, $fileNameCaught);
     }
 
     /**
-     * @covers          UploadedFile::getClientFilename
-     * @dataProvider    dataProviderResourcesValid
-     *
      * @param resource $resource
      */
-    public function testGetEmptyValue($resource): void
+    #[Attributes\Test]
+    #[Attributes\DataProvider('dataProviderResourcesValid')]
+    public function getClientFilenameEmpty($resource): void
     {
         $stream         = new Stream($resource);
         $uploadedFile   = new UploadedFile($stream);
 
-        static::assertNull(
-            $uploadedFile->getClientFilename(),
-            "Action [UploadedFile->getClientFilename] returned unexpected result.\n".
-            "Action was called without parameters [client file name].\n".
-            "Expected result is null.\n".
-            'Caught result is not null.'
-        );
+        static::assertNull($uploadedFile->getClientFilename());
     }
 
-    /**
-     * Data provider: uploaded files with client file name values.
-     */
-    public function dataProviderUploadedFilesWithNameParams(): array
+    public function dataProviderUploadedFilesWithNameParams(): iterable
     {
-        $result = [];
+        foreach ($this->getResourceAccessModesValid() as $mode) {
+            $uploadedFile           = $this->generateUploadedFile();
+            $uploadedFileResource   = $this->generateResource($uploadedFile->tmpName, $mode);
+
+            yield [
+                $uploadedFileResource,
+                $uploadedFile->name,
+                $uploadedFile->name,
+            ];
+        }
 
         foreach ($this->getResourceAccessModesValid() as $mode) {
             $uploadedFile           = $this->generateUploadedFile();
-            $uploadedFileResource   = $this->generateResource($uploadedFile->getTmpName(), $mode);
-            $result[]               = [
-                $uploadedFileResource,
-                $uploadedFile->getName(),
-                $uploadedFile->getName(),
-            ];
-        }
-        foreach ($this->getResourceAccessModesValid() as $mode) {
-            $uploadedFile           = $this->generateUploadedFile();
-            $uploadedFileResource   = $this->generateResource($uploadedFile->getTmpName(), $mode);
-            $result[]               = [
+            $uploadedFileResource   = $this->generateResource($uploadedFile->tmpName, $mode);
+
+            yield [
                 $uploadedFileResource,
                 null,
                 null,
             ];
         }
+
         foreach ($this->getResourceAccessModesValid() as $mode) {
             $uploadedFile           = $this->generateUploadedFile();
-            $uploadedFileResource   = $this->generateResource($uploadedFile->getTmpName(), $mode);
-            $result[]               = [
+            $uploadedFileResource   = $this->generateResource($uploadedFile->tmpName, $mode);
+
+            yield [
                 $uploadedFileResource,
                 '',
                 null,
             ];
         }
-
-        return $result;
     }
 }

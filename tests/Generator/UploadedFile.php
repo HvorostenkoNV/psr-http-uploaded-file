@@ -10,7 +10,10 @@ use HNV\Http\Helper\Generator\{
     GeneratorInterface,
     Text    as TextGenerator,
 };
-use HNV\Http\UploadedFile\UploadedFileError;
+use HNV\Http\UploadedFile\{
+    UploadedFile as UploadedFileSubject,
+    UploadedFileError,
+};
 use LogicException;
 
 use function array_pop;
@@ -24,13 +27,9 @@ use function unlink;
 
 use const DIRECTORY_SEPARATOR;
 
-/**
- * Upload file generator.
- */
 class UploadedFile extends ClearableGenerator implements GeneratorInterface
 {
-    private const UPLOAD_FILES_REGISTRATION_KEY = 'UT_EMULATED_UPLOAD_FILES_KEY';
-    private const FILE_TYPES                    = [
+    private const FILE_TYPES = [
         'txt'   => 'text/plain',
         'jpg'   => 'image/jpeg',
         'pdf'   => 'application/pdf',
@@ -74,22 +73,16 @@ class UploadedFile extends ClearableGenerator implements GeneratorInterface
         );
     }
 
-    /**
-     * Register file and mark it as UnitTests temporary uploaded file.
-     */
     private function registerUploadedFile(string $filePath): void
     {
-        $index              = self::UPLOAD_FILES_REGISTRATION_KEY;
+        $index              = UploadedFileSubject::UT_EMULATED_UPLOAD_FILES_KEY;
         $GLOBALS[$index] ??= [];
         $GLOBALS[$index][]  = $filePath;
     }
 
-    /**
-     * Unregister file, remark it as UnitTests temporary uploaded file.
-     */
     private function unregisterUploadedFile(string $filePath): void
     {
-        $index          = self::UPLOAD_FILES_REGISTRATION_KEY;
+        $index          = UploadedFileSubject::UT_EMULATED_UPLOAD_FILES_KEY;
         $arraySearch    = array_search($filePath, $GLOBALS[$index], true);
 
         unset($GLOBALS[$index][$arraySearch]);

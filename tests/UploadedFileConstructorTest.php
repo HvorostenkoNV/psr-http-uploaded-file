@@ -9,36 +9,27 @@ use HNV\Http\{
     UploadedFile\UploadedFile,
 };
 use InvalidArgumentException;
+use PHPUnit\Framework\Attributes;
 
 /**
- * PSR-7 UploadedFileInterface implementation test.
- *
- * Testing constructor behavior.
- *
  * @internal
- * @covers UploadedFile
- * @small
  */
-class UploadedFileConstructorTest extends AbstractUploadedFileTest
+#[Attributes\CoversClass(UploadedFile::class)]
+#[Attributes\Small]
+class UploadedFileConstructorTest extends AbstractUploadedFileTestCase
 {
     /**
-     * @covers          UploadedFile::__constructor
-     * @dataProvider    dataProviderResourcesInvalid
-     *
      * @param resource $resource
      */
-    public function testConstructorThrowsException($resource): void
+    #[Attributes\Test]
+    #[Attributes\DataProvider('dataProviderResourcesInvalid')]
+    public function constructorThrowsException($resource): void
     {
         $this->expectException(InvalidArgumentException::class);
 
         $stream = new Stream($resource);
         new UploadedFile($stream);
 
-        static::fail(
-            "Action [UploadedFile->__construct] threw no expected exception.\n".
-            "Action was called with parameters [stream => invalid stream].\n".
-            "Expects [InvalidArgumentException] exception.\n".
-            'Caught no exception.'
-        );
+        static::fail();
     }
 }

@@ -8,29 +8,25 @@ use HNV\Http\{
     Stream\Stream,
     UploadedFile\UploadedFile,
 };
+use PHPUnit\Framework\Attributes;
 use RuntimeException;
 
 use function md5_file;
 use function unlink;
 
 /**
- * PSR-7 UploadedFileInterface implementation test.
- *
- * Testing stream providing process.
- *
  * @internal
- * @covers UploadedFile
- * @small
  */
-class UploadedFileGetStreamTest extends AbstractUploadedFileTest
+#[Attributes\CoversClass(UploadedFile::class)]
+#[Attributes\Small]
+class UploadedFileGetStreamTest extends AbstractUploadedFileTestCase
 {
     /**
-     * @covers          UploadedFile::getStream
-     * @dataProvider    dataProviderResourcesValid
-     *
      * @param resource $resource
      */
-    public function testGetValue($resource): void
+    #[Attributes\Test]
+    #[Attributes\DataProvider('dataProviderResourcesValid')]
+    public function getStream($resource): void
     {
         $stream             = new Stream($resource);
         $streamFilePath     = $stream->getMetadata('uri');
@@ -40,29 +36,16 @@ class UploadedFileGetStreamTest extends AbstractUploadedFileTest
         $uploadedFilePath   = $uploadedFile->getStream()->getMetadata('uri');
         $uploadedFileHash   = md5_file($uploadedFilePath);
 
-        static::assertSame(
-            $streamFilePath,
-            $uploadedFilePath,
-            "Action [UploadedFile->getStream] returned unexpected result.\n".
-            "Expected result is [stream file path => {$streamFilePath}].\n".
-            "Caught result is [stream file path => {$uploadedFilePath}]."
-        );
-        static::assertSame(
-            $streamFileHash,
-            $uploadedFileHash,
-            "Action [UploadedFile->getStream] returned unexpected result.\n".
-            "Expected result is [stream file hash as was set].\n".
-            'Caught result is "stream file hash is not the same".'
-        );
+        static::assertSame($streamFilePath, $uploadedFilePath);
+        static::assertSame($streamFileHash, $uploadedFileHash);
     }
 
     /**
-     * @covers          UploadedFile::getStream
-     * @dataProvider    dataProviderResourcesValid
-     *
-     * @param resource $resource resource
+     * @param resource $resource
      */
-    public function testGetValueThrowsException($resource): void
+    #[Attributes\Test]
+    #[Attributes\DataProvider('dataProviderResourcesValid')]
+    public function getStreamThrowsException($resource): void
     {
         $this->expectException(RuntimeException::class);
 
@@ -73,11 +56,6 @@ class UploadedFileGetStreamTest extends AbstractUploadedFileTest
         unlink($filePath);
         $uploadedFile->getStream();
 
-        static::fail(
-            "Action [UploadedFile->getStream] threw no expected exception.\n".
-            "Underlying file was deleted.\n".
-            "Expects [RuntimeException] exception.\n".
-            'Caught no exception.'
-        );
+        static::fail();
     }
 }

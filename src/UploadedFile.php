@@ -23,7 +23,7 @@ use const PHP_SAPI;
 
 class UploadedFile implements UploadedFileInterface
 {
-    private const UT_EMULATED_UPLOAD_FILES_KEY = 'UT_EMULATED_UPLOAD_FILES_KEY';
+    public const UT_EMULATED_UPLOAD_FILES_KEY = 'UT_EMULATED_UPLOAD_FILES_KEY';
 
     private bool $isMoved               = false;
     private bool $sapiEnvironmentExist  = false;
@@ -192,7 +192,7 @@ class UploadedFile implements UploadedFileInterface
      */
     private function isUnitTestUploadFile(string $filePath): bool
     {
-        $emulatedRegisteredFiles = (array) ($GLOBALS[self::UT_EMULATED_UPLOAD_FILES_KEY] ?? []);
+        $emulatedRegisteredFiles = (array) ($GLOBALS[static::UT_EMULATED_UPLOAD_FILES_KEY] ?? []);
 
         return in_array($filePath, $emulatedRegisteredFiles, true);
     }
