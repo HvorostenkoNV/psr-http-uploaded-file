@@ -4,16 +4,13 @@ declare(strict_types=1);
 
 namespace HNV\Http\UploadedFile;
 
+use InvalidArgumentException;
 use Psr\Http\Message\{
     StreamInterface,
     UploadedFileFactoryInterface,
     UploadedFileInterface,
 };
-use ValueError;
 
-/**
- * PSR-7 UploadedFileFactoryInterface implementation.
- */
 class UploadedFileFactory implements UploadedFileFactoryInterface
 {
     /**
@@ -28,7 +25,7 @@ class UploadedFileFactory implements UploadedFileFactoryInterface
     ): UploadedFileInterface {
         try {
             $errorCase = UploadedFileError::from($error);
-        } catch (ValueError) {
+        } catch (InvalidArgumentException) {
             $errorCase = UploadedFileError::OK;
         }
 

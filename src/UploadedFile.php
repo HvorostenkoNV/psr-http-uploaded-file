@@ -21,9 +21,6 @@ use function strlen;
 
 use const PHP_SAPI;
 
-/**
- * PSR-7 UploadedFileInterface implementation.
- */
 class UploadedFile implements UploadedFileInterface
 {
     private const UT_EMULATED_UPLOAD_FILES_KEY = 'UT_EMULATED_UPLOAD_FILES_KEY';
@@ -173,7 +170,7 @@ class UploadedFile implements UploadedFileInterface
     }
 
     /**
-     * @throws RuntimeException moving process failed
+     * @throws RuntimeException
      */
     private function moveStream(string $targetPath): void
     {

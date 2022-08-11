@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace HNV\Http\UploadedFile;
 
-use ValueError;
+use InvalidArgumentException;
 
 use const UPLOAD_ERR_CANT_WRITE;
 use const UPLOAD_ERR_EXTENSION;
@@ -15,9 +15,6 @@ use const UPLOAD_ERR_NO_TMP_DIR;
 use const UPLOAD_ERR_OK;
 use const UPLOAD_ERR_PARTIAL;
 
-/**
- * Uploaded file errors collection.
- */
 enum UploadedFileError
 {
     case OK;
@@ -28,6 +25,7 @@ enum UploadedFileError
     case ERROR_NO_TMP_DIR;
     case ERROR_CANT_WRITE;
     case ERROR_EXTENSION;
+
     /**
      * Get value, which is exact as "UPLOAD" constants.
      */
@@ -45,9 +43,6 @@ enum UploadedFileError
         };
     }
 
-    /**
-     * Get error message.
-     */
     public function message(): string
     {
         return match ($this) {
@@ -65,7 +60,7 @@ enum UploadedFileError
     }
 
     /**
-     * @throws ValueError
+     * @throws InvalidArgumentException
      */
     public static function from(int $value): self
     {
@@ -75,6 +70,6 @@ enum UploadedFileError
             }
         }
 
-        throw new ValueError("unknown case for value [{$value}]");
+        throw new InvalidArgumentException("unknown case for value [{$value}]");
     }
 }
